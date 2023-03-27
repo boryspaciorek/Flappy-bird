@@ -4,7 +4,7 @@ class Bird:
     def __init__(self,game):
         super().__init__()
         self.settings = game.settings
-        self.image = pygame.image.load("picture/bird.bmp")
+        self.image = pygame.image.load("picture/bird.bmp").convert_alpha()
         self.image = pygame.transform.scale(self.image, (self.settings.bird_width, self.settings.bird_height))
         self.rect = self.image.get_rect()
         self.rect.x = 500

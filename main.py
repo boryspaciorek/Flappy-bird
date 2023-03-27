@@ -5,7 +5,7 @@ from settings import Settings
 from bird import Bird
 from background import Background
 from background import Line_on_the_bottom
-from tube import Tube_bottom,Tube_top
+from tube import Tube_bottom, Tube_top, End_tube, Line_between_tube
 class Game:
     """classa główna"""
     def __init__(self):
@@ -25,6 +25,10 @@ class Game:
         #rury
         self.tubes_bottom = pygame.sprite.Group()
         self.tubes_top = pygame.sprite.Group()
+        self.end_tubes = pygame.sprite.Group()
+        self.tubes_points = pygame.sprite.Group()
+        #pkt
+        self.points = 0
 
 
     def start_game(self):
@@ -50,11 +54,13 @@ class Game:
                 exit()
 
     def move_bird(self):
+        """zarządza ptakiem"""
         self.bird.update_bird()
         self._check_bird()
 
     def _check_bird(self):
-        if self.bird.rect.y < 0:
+        """sprawdza czy ptak nie wychodzi poza mapę"""
+        if self.bird.rect.y + self.bird.speed_fall < 0:
             self.bird.speed_fall = 0
             self.bird.angle = -45
 
@@ -70,7 +76,7 @@ class Game:
             exit()
 
     def update_screen(self):
-        #uaktualnia ekran
+        """uaktualnia ekran"""
         self.background.show_background()
         self._show_all_lines()
         self.bird.show_bird()
@@ -84,6 +90,7 @@ class Game:
         """pokazuje tuby"""
         self.tubes_bottom.draw(self.screen)
         self.tubes_top.draw(self.screen)
+        self.end_tubes.draw(self.screen)
 
 
     def move_lines(self):
@@ -91,15 +98,19 @@ class Game:
         for i in self.lines:
             i.move_line()
             if i.image_rect.right < 0:
-                i.change_place_line(self.i.rect.width)
+                i.change_place_line(i.image_rect.width)
 
     def _show_all_lines(self):
+        """pokazuje dolne linie"""
         for i in self.lines:
             i.show_line()
 
     def move_tubes(self):
+        """porusza tubami"""
         self.tubes_bottom.update()
         self.tubes_top.update()
+        self.end_tubes.update()
+        self.tubes_points.update()
         self._check_border()
 
     def _check_border(self):
@@ -108,16 +119,29 @@ class Game:
             if self.tubes_top.sprites()[i].rect.right<0:
                 self.tubes_top.remove(self.tubes_top.sprites()[i])
                 self.tubes_bottom.remove(self.tubes_bottom.sprites()[i])
+                self.end_tubes.remove(self.tubes_bottom.sprites()[i])
+                self.end_tubes.remove(self.tubes_bottom.sprites()[i])
                 break
+        collision = pygame.sprite.spritecollideany(self.bird, self.tubes_points,)
+        if collision:
+            self.tubes_points.remove(collision)
+            self.points += 1
 
     def add_tubes(self):
+        """dodaje tube"""
         if not self.tubes_top or self.tubes_top.sprites()[-1].rect.right + self.settings.space_between_next_tube < self.screen_rect.width:
-            random=randint(100,900)
+            random=randint(350,800)
             bottom_tube = Tube_bottom(self, random)
             top_tube=Tube_top(self, bottom_tube.rect.y - self.settings.space_between_tube)
+            end_tube_bottom = End_tube(self, bottom_tube.rect.y)
+            end_tube_top = End_tube(self, top_tube.rect.bottom,False)
+            tube_point=Line_between_tube(self, random - self.settings.space_between_tube)
             self.tubes_top.add(top_tube)
             self.tubes_bottom.add(bottom_tube)
-            print(len(self.tubes_top))
+            self.end_tubes.add(end_tube_bottom)
+            self.end_tubes.add(end_tube_top)
+            self.tubes_points.add(tube_point)
+            print(self.points)
 
 if __name__=="__main__":
     ai = Game()

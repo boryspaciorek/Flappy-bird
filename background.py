@@ -16,7 +16,7 @@ class Line_on_the_bottom:
     def __init__(self, game,x):
         super().__init__()
         self.screen=game.screen
-        self.image=pygame.image.load("picture/line_on_the_bottom.bmp")
+        self.image=pygame.image.load("picture/line_on_the_bottom.bmp").convert()
         self.image=pygame.transform.scale(self.image,(1536,16 ))
         self.image_rect=self.image.get_rect()
         self.image_rect.x = x
@@ -35,4 +35,5 @@ class Line_on_the_bottom:
         self.image_rect.x=self.x
 
     def change_place_line(self,x):
+        self.x = x
         self.image_rect.x = x
