@@ -6,6 +6,8 @@ from bird import Bird
 from background import Background
 from background import Line_on_the_bottom
 from tube import Tube_bottom, Tube_top, End_tube, Line_between_tube
+from points import Points
+
 class Game:
     """classa główna"""
     def __init__(self):
@@ -28,7 +30,7 @@ class Game:
         self.end_tubes = pygame.sprite.Group()
         self.tubes_points = pygame.sprite.Group()
         #pkt
-        self.points = 0
+        self.points = Points(self)
 
 
     def start_game(self):
@@ -81,6 +83,7 @@ class Game:
         self._show_all_lines()
         self.bird.show_bird()
         self._show_tubes()
+        self.points.show_points()
         pygame.display.flip()
 
         self.screen.fill((40,40,40))
@@ -125,7 +128,7 @@ class Game:
         collision = pygame.sprite.spritecollideany(self.bird, self.tubes_points,)
         if collision:
             self.tubes_points.remove(collision)
-            self.points += 1
+            self.points.update()
 
     def add_tubes(self):
         """dodaje tube"""
@@ -141,7 +144,6 @@ class Game:
             self.end_tubes.add(end_tube_bottom)
             self.end_tubes.add(end_tube_top)
             self.tubes_points.add(tube_point)
-            print(self.points)
 
 if __name__=="__main__":
     ai = Game()
