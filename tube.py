@@ -28,6 +28,7 @@ class Tube_top(Tube_bottom):
         #self.image = pygame.transform.rotate(self.image,180)
         self.image = pygame.transform.scale(self.image, (game.settings.tube_width,y))
         self.rect = self.image.get_rect()
+        self.rect.x = self.screen_rect.width
         self.rect.bottom = y
 
 

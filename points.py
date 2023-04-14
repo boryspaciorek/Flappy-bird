@@ -10,6 +10,7 @@ class Points():
 
     def reset_points(self):
         self.points = 0
+        self._prep_points()
 
     def _prep_points(self):
         self.text = self.font.render(str(self.points),True,(0,0,0),None)

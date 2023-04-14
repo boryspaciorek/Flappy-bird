@@ -1,3 +1,4 @@
+from time import sleep
 import pygame
 from random import randint
 from sys import exit
@@ -7,6 +8,9 @@ from background import Background
 from background import Line_on_the_bottom
 from tube import Tube_bottom, Tube_top, End_tube, Line_between_tube
 from points import Points
+from button import Button
+
+
 
 class Game:
     """classa główna"""
@@ -20,6 +24,8 @@ class Game:
         self.settings.screen_width = self.screen_rect.width
         #ptak
         self.bird = Bird(self)
+        self.bird.set_bird()
+        #tło
         self.background = Background(self)
         #zielona linia tworząca iluzje poruszania się
         self.lines = [Line_on_the_bottom(self,0)]
@@ -31,19 +37,26 @@ class Game:
         self.tubes_points = pygame.sprite.Group()
         #pkt
         self.points = Points(self)
+        #włączenie gry
+        self.death = False
+        self.run_game = False
+        self.moving_bird = False
+        self.play_button = Button(self)
 
 
     def start_game(self):
         """funkcja główna"""
-
         while True:
             #time.sleep(0.2)
             self.events()
             self.update_screen()
-            self.move_bird()
-            self.move_lines()
-            self.move_tubes()
-            self.add_tubes()
+            if self.run_game:
+                self.move_bird()
+                if self.moving_bird:
+                    self.move_tubes()
+                    self.add_tubes()
+                    self.move_lines()
+
 
     def events(self):
         """sprawdza rodzaj sytuacji"""
@@ -52,6 +65,10 @@ class Game:
                 self._event_down(event)
             elif event.type == pygame.KEYUP:
                 self._event_up(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.check_buttons_hold()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self.check_buttons_release()
             elif event.type == pygame.QUIT:
                 exit()
 
@@ -65,11 +82,15 @@ class Game:
         if self.bird.rect.y + self.bird.speed_fall < 0:
             self.bird.speed_fall = 0
             self.bird.angle = -45
+        self._check_colision_tube_bird()
 
     def _event_down(self,event):
         """sprawdza wciśnietę klawisze"""
         if event.key == pygame.K_SPACE:
-            self.bird.jump( )
+            if not self.moving_bird and self.run_game:
+                self.moving_bird = True
+            if self.moving_bird:
+                self.bird.jump( )
 
 
     def _event_up(self,event):
@@ -79,14 +100,16 @@ class Game:
 
     def update_screen(self):
         """uaktualnia ekran"""
+        pygame.display.flip()
         self.background.show_background()
         self._show_all_lines()
-        self.bird.show_bird()
-        self._show_tubes()
-        self.points.show_points()
-        pygame.display.flip()
 
-        self.screen.fill((40,40,40))
+        if self.run_game:
+            self._show_tubes()
+            self.points.show_points()
+            self.bird.show_bird()
+        else:
+            self.play_button.show_button()
 
 
     def _show_tubes(self):
@@ -132,7 +155,8 @@ class Game:
 
     def add_tubes(self):
         """dodaje tube"""
-        if not self.tubes_top or self.tubes_top.sprites()[-1].rect.right + self.settings.space_between_next_tube < self.screen_rect.width:
+        if not self.tubes_top or \
+                self.tubes_top.sprites()[-1].rect.right + self.settings.space_between_next_tube < self.screen_rect.width:
             random=randint(350,800)
             bottom_tube = Tube_bottom(self, random)
             top_tube=Tube_top(self, bottom_tube.rect.y - self.settings.space_between_tube)
@@ -144,6 +168,52 @@ class Game:
             self.end_tubes.add(end_tube_bottom)
             self.end_tubes.add(end_tube_top)
             self.tubes_points.add(tube_point)
+
+    def _check_colision_tube_bird(self):
+        """sprawdza możliwości śmierci"""
+        collision_top = pygame.sprite.spritecollideany(self.bird, self.tubes_top)
+        collision_bottom = pygame.sprite.spritecollideany(self.bird, self.tubes_bottom)
+        if collision_bottom or collision_top:
+            self.hit_tube()
+        if self.bird.rect.bottom > self.lines[0].image_rect.y:
+            self.die()
+
+    def hit_tube(self):
+        self.settings.clear_setings()
+        self.moving_bird = False
+
+    def check_buttons_hold(self):
+        """sprawdza czy guziki są wciśniete"""
+        mouse_pos = pygame.mouse.get_pos()
+        if self.play_button.rect.collidepoint(mouse_pos):
+            self.play_button.hold_button()
+
+    def check_buttons_release(self):
+        """sprawdza czy guzik został puszczony"""
+        if self.play_button.button_click:
+            self.play_button.release_button()
+            mouse_pos = pygame.mouse.get_pos()
+            #jeśli został wciśniety to sprawdza czy jest puszczany na obszarze przycisku
+            if self.play_button.rect.collidepoint(mouse_pos):
+                self.run_game = True
+                self.settings.reset_settings()
+
+    def _clear_tube(self):
+        self.tubes_top.empty()
+        self.tubes_bottom.empty()
+        self.tubes_points.empty()
+        self.end_tubes.empty()
+
+    def die(self):
+        """odpowiada za to co się dzieje po śmierci gracza"""
+        sleep(0.5)
+        self._clear_tube()
+        self.bird.set_bird()
+        self.points.reset_points()
+        self.run_game = False
+
+
+
 
 if __name__=="__main__":
     ai = Game()
