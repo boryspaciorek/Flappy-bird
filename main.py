@@ -41,6 +41,7 @@ class Game:
         self.death = False
         self.run_game = False
         self.moving_bird = False
+        self.falling_bird = False
         self.play_button = Button(self)
 
 
@@ -74,8 +75,9 @@ class Game:
 
     def move_bird(self):
         """zarządza ptakiem"""
-        self.bird.update_bird()
-        self._check_bird()
+        if self.falling_bird:
+            self.bird.update_bird()
+            self._check_bird()
 
     def _check_bird(self):
         """sprawdza czy ptak nie wychodzi poza mapę"""
@@ -87,9 +89,9 @@ class Game:
     def _event_down(self,event):
         """sprawdza wciśnietę klawisze"""
         if event.key == pygame.K_SPACE:
-            if not self.moving_bird and self.run_game:
+            self.falling_bird = True
+            if not self.death:
                 self.moving_bird = True
-            if self.moving_bird:
                 self.bird.jump( )
 
 
@@ -181,6 +183,7 @@ class Game:
     def hit_tube(self):
         self.settings.clear_setings()
         self.moving_bird = False
+        self.death = True
 
     def check_buttons_hold(self):
         """sprawdza czy guziki są wciśniete"""
@@ -195,6 +198,7 @@ class Game:
             mouse_pos = pygame.mouse.get_pos()
             #jeśli został wciśniety to sprawdza czy jest puszczany na obszarze przycisku
             if self.play_button.rect.collidepoint(mouse_pos):
+                self.death = False
                 self.run_game = True
                 self.settings.reset_settings()
 
@@ -211,6 +215,7 @@ class Game:
         self.bird.set_bird()
         self.points.reset_points()
         self.run_game = False
+        self.falling_bird = False
 
 
 

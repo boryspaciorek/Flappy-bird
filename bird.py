@@ -16,6 +16,7 @@ class Bird:
         self.angle = 0
 
 
+
     def show_bird(self):
         self.rotated_image=pygame.transform.rotate(self.image,self.angle)
         new_rect = self.rotated_image.get_rect(center=self.image.get_rect(center=self.rect.center).center)
