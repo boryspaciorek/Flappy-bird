@@ -1,3 +1,4 @@
+from pygame import mixer
 import pygame.font
 
 class Points():
@@ -7,6 +8,8 @@ class Points():
         self.font = pygame.font.SysFont(None,48)
         self.points = 0
         self._prep_points()
+        self.sound = game.sound
+        self.sound_point = mixer.Sound("sound/point.wav")
 
     def reset_points(self):
         self.points = 0
@@ -21,6 +24,8 @@ class Points():
     def update(self):
         self.points += 1
         self._prep_points()
+        if self.sound:
+            self.sound_point.play()
 
     def show_points(self):
         self.screen.blit(self.text,self.rect)

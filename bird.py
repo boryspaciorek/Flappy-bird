@@ -14,7 +14,9 @@ class Bird:
         self.screen = game.screen
         self.speed_fall = 0
         self.angle = 0
-
+        #dźwiek
+        self.sound = game.sound
+        self.jump_sound = pygame.mixer.Sound("sound/flap_3.wav")
 
 
     def show_bird(self):
@@ -40,3 +42,5 @@ class Bird:
     def jump(self):
         self.speed_fall = self.settings.jump_speed
         self.angle = 90
+        if self.sound:
+            self.jump_sound.play()

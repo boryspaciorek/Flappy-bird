@@ -22,6 +22,8 @@ class Game:
         self.screen_rect = self.screen.get_rect()
         self.settings.screen_height = self.screen_rect.height
         self.settings.screen_width = self.screen_rect.width
+        # dźwiek
+        self.sound = True
         #ptak
         self.bird = Bird(self)
         self.bird.set_bird()
@@ -43,6 +45,12 @@ class Game:
         self.moving_bird = False
         self.falling_bird = False
         self.play_button = Button(self)
+        #dźwiek
+        self.death_sound = pygame.mixer.Sound("sound/die.wav")
+        self.hit_sound = pygame.mixer.Sound("sound/hit.wav")
+        self.hit_count = 0 #służy do tego żeby dźwiek włączył się tylko raz
+
+
 
 
     def start_game(self):
@@ -177,7 +185,11 @@ class Game:
         collision_bottom = pygame.sprite.spritecollideany(self.bird, self.tubes_bottom)
         if collision_bottom or collision_top:
             self.hit_tube()
+            if self.sound and self.hit_count == 0:
+                self.hit_sound.play()
+                self.hit_count += 1
         if self.bird.rect.bottom > self.lines[0].image_rect.y:
+            self.hit_count = 0
             self.die()
 
     def hit_tube(self):
@@ -210,6 +222,7 @@ class Game:
 
     def die(self):
         """odpowiada za to co się dzieje po śmierci gracza"""
+        self.death_sound.play()
         sleep(0.5)
         self._clear_tube()
         self.bird.set_bird()
